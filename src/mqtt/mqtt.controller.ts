@@ -5,13 +5,18 @@ import { Controller, Get, Post } from '@nestjs/common';
 export class MqttController {
     constructor(private readonly service: MqttService) {}
 
-    @Get('publish')
-    async publish(){
-        return await this.service.publish();
-    }
+    @Get('/subscribe')
+  subscribe(): string {
+    this.service.subscribe('my/topic', (message) => {
+      console.log(`Received message: ${message}`);
+    });
 
-    @Get('connect')
-    async connect() {
-        return await this.service.connect();
-    }
+    return 'Subscribed to topic';
+  }
+
+  @Get('/publish')
+  publish(): string {
+    this.service.publish('cmnd/tasmota_EB0ADA/power', 'off');
+    return 'Published message';
+  }
 }
