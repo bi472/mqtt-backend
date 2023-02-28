@@ -1,52 +1,58 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger} from '@nestjs/common';
 import { connect } from "mqtt";
-import { debug, error, info } from "ps-logger";
+import { MqttOptionsDto} from './dto/options';
 
 
 
 
 
 @Injectable()
-export class MqttService implements OnModuleInit{
+export class MqttService{
 
+    private readonly logger = new Logger(MqttService.name);
     private mqttClient;
 
-    onModuleInit() {
-        const host = process.env.mqttHost
-        const port = process.env.mqttPort
-        const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
+    connect(mqttOptionsDto: MqttOptionsDto): boolean {
+      const host = mqttOptionsDto.host
+      const port = mqttOptionsDto.port
+      const username = mqttOptionsDto.username
+      const password = mqttOptionsDto.password
+      const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
 
-        const connectUrl = `mqtt://${host}:${port}`;
+      const options = {
+        clientId,
+        clean: true,
+        connectTimeout: 4000,
+        username,
+        password,
+        reconnectPeriod: 10000,
+        rejectUnauthorized: false,
+      }
 
-        this.mqttClient = connect(connectUrl, {
-            clientId,
-            clean: true,
-            connectTimeout: 4000,
-            username: process.env.mqttUser,
-            password: process.env.mqttPass,
-            reconnectPeriod: 1000,
-        });
+      const connectUrl = `ws${mqttOptionsDto.sslConnection ? 's' : ''}://${host}:${port}`;
 
-        this.mqttClient.on("connect", function () {
-            info("Connected to CloudMQTT");
-        });
+      this.mqttClient = connect(connectUrl, options);
 
-        this.mqttClient.on("error",
-            (error) => {
-                console.error(`MQTT client error: ${error}`);
-        });
+      this.mqttClient.on("connect", () => {
+          console.log(`Connected to MQTT server. clientID: <${clientId}> connectionUrl: ${connectUrl}`)
+      });
+
+      this.mqttClient.on("error",
+          (error) => {
+              console.log(`MQTT client error: ${error}`);
+      })
+      .on("reconnect", () => {
+          console.log(`Reconnecting to MQTT server.`)
+      });
+    return true
     }
 
-    subscribe(topic: string, callback: (message: string) => void): void {
+    async subscribe(topic: string, callback: (message: string) => void): Promise<void> {
         this.mqttClient.subscribe(topic, (err) => {
-          if (err) {
-            console.error(err);
-          } else {
-            console.log(`Subscribed to topic ${topic}`);
-          }
+          err ? this.logger.error(err): this.logger.log(`Subscribed to topic ${topic}`);
         });
     
-        this.mqttClient.on('message', (t, m) => {
+        this.mqttClient.on('message', async(t, m) => {
           if (t === topic) {
             callback(m.toString());
           }
@@ -55,11 +61,7 @@ export class MqttService implements OnModuleInit{
     
       publish(topic: string, message: string): void {
         this.mqttClient.publish(topic, message, (err) => {
-          if (err) {
-            console.error(err);
-          } else {
-            console.log(`Published message "${message}" to topic ${topic}`);
-          }
-        });
+          err ? this.logger.log(err) : this.logger.log(`Published message "${message}" to topic ${topic}`);
+          });
       }
     }
