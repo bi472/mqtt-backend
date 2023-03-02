@@ -12,7 +12,7 @@ export class MqttService{
     private readonly logger = new Logger(MqttService.name);
     private mqttClient;
 
-    connect(mqttOptionsDto: MqttOptionsDto): boolean {
+    async connect(mqttOptionsDto: MqttOptionsDto, callback:(connected: boolean) => void): Promise<void> {
       const host = mqttOptionsDto.host
       const port = mqttOptionsDto.port
       const username = mqttOptionsDto.username
@@ -33,18 +33,20 @@ export class MqttService{
 
       this.mqttClient = connect(connectUrl, options);
 
-      this.mqttClient.on("connect", () => {
+      this.mqttClient.on("connect", async () => {
+          callback(this.mqttClient.connected)
           console.log(`Connected to MQTT server. clientID: <${clientId}> connectionUrl: ${connectUrl}`)
+
       });
 
       this.mqttClient.on("error",
           (error) => {
+              callback(this.mqttClient.connected)
               console.log(`MQTT client error: ${error}`);
       })
       .on("reconnect", () => {
           console.log(`Reconnecting to MQTT server.`)
       });
-    return true
     }
 
     async subscribe(topic: string, callback: (message: string) => void): Promise<void> {
@@ -52,7 +54,7 @@ export class MqttService{
           err ? this.logger.error(err): this.logger.log(`Subscribed to topic ${topic}`);
         });
     
-        this.mqttClient.on('message', async(t, m) => {
+        this.mqttClient.on('message', async (t, m) => {
           if (t === topic) {
             callback(m.toString());
           }
