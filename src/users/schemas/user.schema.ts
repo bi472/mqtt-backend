@@ -6,7 +6,7 @@ export type UserDocument = User & Document;
 
 @Schema()
 export class User {
-    @Prop({required: true, unique: true})
+    @Prop({ type: String, default: uuidv4 })
     uuid: string;
 
     @Prop({ required: true, unique: true })
