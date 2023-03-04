@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { MqttModule } from './mqtt/mqtt.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { TemplatesModule } from './templates/templates.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { AuthModule } from './auth/auth.module';
     MqttModule,
     MongooseModule.forRoot(process.env.mongoURL),
     UsersModule,
-    AuthModule
+    AuthModule,
+    TemplatesModule
   ],
   controllers: [AppController],
   providers: [AppService],

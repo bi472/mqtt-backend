@@ -14,28 +14,39 @@ export class UsersService {
     return createdUser.save();
   }
 
-  async findAll(): Promise<UserDocument[]> {
-    return this.userModel.find().exec();
+  async findUserTemplates(userID: string): Promise<any>{
+    const userData = await this.userModel.findOne({id: userID}).populate('templates').exec()
+    return userData.templates;
+  }
+
+  async updateUserTemplates(id: string, templateID: string) {
+    return await this.userModel
+      .findOneAndUpdate(
+        {id},
+        {$push: {templates: templateID}},
+        {new: true}
+      )
+      .exec()
+  }
+
+  async findByUsername(username: string): Promise<UserDocument>{
+    return this.userModel.findOne({username}).exec();
   }
 
   async findById(id: string): Promise<UserDocument> {
-    return this.userModel.findById(id);
-  }
-
-  async findByUsername(username: string): Promise<UserDocument> {
-    return this.userModel.findOne({ username }).exec();
+    return this.userModel.findOne({id}).exec();
   }
 
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<UserDocument> {
-    return this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
+    return await this.userModel
+      .findOneAndUpdate({id}, updateUserDto, { new: true })
       .exec();
   }
 
   async remove(id: string): Promise<UserDocument> {
-    return this.userModel.findByIdAndDelete(id).exec();
+    return this.userModel.findOneAndDelete({id}).exec();
   }
 }
