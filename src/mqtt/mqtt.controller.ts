@@ -1,6 +1,10 @@
 import { MqttService } from './mqtt.service';
-import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
-import { MqttOptionsDto } from './dto/options';
+import { Body, Controller, Get, Logger, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
+import { MqttOptionsDto } from './dto/create-options'
+import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
+import { UsersService } from 'src/users/users.service';
+import { MqttOptions } from './schemas/mqttOptions.schema';
 
 @Controller('mqtt')
 export class MqttController {
@@ -8,37 +12,55 @@ export class MqttController {
   private logger= new Logger(MqttController.name);
 
   constructor(
-    private readonly service: MqttService) {}
+    private readonly mqttService: MqttService,
+    private readonly userService: UsersService
+    ) {}
 
-  @Get('disconnect')
-  async disconnect(
-    @Body() body: { clientID: string}
-  ): Promise<boolean>{
-    return true
-  }
-
+  @UseGuards(AccessTokenGuard)
   @Get('connect')
   async connect(
-    @Body() mqttOptionsDto: MqttOptionsDto
+    @Body() mqttOptionsDto: Promise<MqttOptionsDto>,
+    @Req() req: Request
   ): Promise<boolean>{
     return new Promise(
       (resolve, reject) => {
-        this.service.connect(mqttOptionsDto, 
-          (connected: boolean) => {
-          resolve(connected)
-        })
+        this.mqttService.connect(mqttOptionsDto, 
+          (connected: boolean) => { resolve(connected) })
+      }
+    )
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Post('mqttoptions')
+  async createMqttOptions(
+    @Req() req: Request,
+    @Body() body: MqttOptionsDto
+  ) : Promise<any>{
+    
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Get('connect/:mqttOptionsID')
+  async connectBySavedOptions(
+    @Req() req: Request,
+    @Param() mqttOptionsID: string,
+  ): Promise<boolean>{
+    return new Promise(
+      (resolve, reject) => {
+        const mqttOptionsDto = this.userService.findUserMqttOptions(req.user['sub'])
+        
       }
     )
   }
 
 
-
+  @UseGuards(AccessTokenGuard)
   @Get('/subscribe')
   async subscribe(
     @Body() body: { topic: string },
   ): Promise<{ message: string }> {
       return new Promise((resolve, reject) => {
-        this.service.subscribe(body.topic, 
+        this.mqttService.subscribe(body.topic, 
           (message: string) => {
               this.logger.log(`Received message on ${body.topic}: ${message}`) 
               resolve({message})
@@ -46,12 +68,13 @@ export class MqttController {
           );
       })
     }
-
+  
+  @UseGuards(AccessTokenGuard)
   @Get('/publish')
   async publish(
     @Body() body: { topic: string, message: string}
   ): Promise<string> {
-    this.service.publish(body.topic, body.message);
+    this.mqttService.publish(body.topic, body.message);
     return `Published ${body.message} to ${body.topic}`;
   }
 }

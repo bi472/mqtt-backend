@@ -1,6 +1,6 @@
 import { IsNotEmpty } from "class-validator";
 
-export class MqttOptionsDto {
+export class CreateMqttOptionsDto {
     @IsNotEmpty({message: 'Please enter hostname'})
     host: string;
 

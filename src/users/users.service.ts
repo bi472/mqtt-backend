@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { CreateMqttOptionsDto } from 'src/mqtt/dto/create-options';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
@@ -12,6 +13,11 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<UserDocument> {
     const createdUser = new this.userModel(createUserDto);
     return createdUser.save();
+  }
+
+  async findUserMqttOptions(userID: string): Promise<MqttOptionsDto[]> {
+    const userData = await this.userModel.findOne({id: userID}).populate('mqttOptions').exec()
+    return userData.mqttOptions;
   }
 
   async findUserTemplates(userID: string): Promise<any>{

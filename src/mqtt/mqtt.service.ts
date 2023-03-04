@@ -1,22 +1,35 @@
 import { Injectable, Logger} from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { connect } from "mqtt";
-import { MqttOptionsDto} from './dto/options';
-
-
-
-
+import { CreateMqttOptionsDto, MqttOptionsDto} from './dto/create-options';
+import { MqttOptions, MqttOptionsDocument } from './schemas/mqttOptions.schema';
 
 @Injectable()
 export class MqttService{
 
+    constructor(
+      @InjectModel(MqttOptions.name) private mqttOptionsModel: Model<MqttOptionsDocument>
+    ) {}
+
     private readonly logger = new Logger(MqttService.name);
     private mqttClient;
 
-    async connect(mqttOptionsDto: MqttOptionsDto, callback:(connected: boolean) => void): Promise<void> {
-      const host = mqttOptionsDto.host
-      const port = mqttOptionsDto.port
-      const username = mqttOptionsDto.username
-      const password = mqttOptionsDto.password
+    async readMqttOptions(mqttOptionsID: string): Promise<MqttOptionsDto> {
+      return await this.mqttOptionsModel.findById(mqttOptionsID).exec()
+    }
+
+    async createMqttOptions(createMqttOptionsDto: CreateMqttOptionsDto): Promise<MqttOptionsDto>{
+      const createdMqttOptions = new this.mqttOptionsModel(createMqttOptionsDto)
+      return createdMqttOptions.save()
+    }
+
+
+    async connect(mqttOptionsDto: Promise<MqttOptionsDto>, callback:(connected: boolean) => void): Promise<void> {
+      const host = (await mqttOptionsDto).host
+      const port = (await mqttOptionsDto).port
+      const username = (await mqttOptionsDto).username
+      const password = (await mqttOptionsDto).password
       const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
 
       const options = {
@@ -29,12 +42,13 @@ export class MqttService{
         rejectUnauthorized: false,
       }
 
-      const connectUrl = `ws${mqttOptionsDto.sslConnection ? 's' : ''}://${host}:${port}`;
+      const connectUrl = `ws${(await mqttOptionsDto).sslConnection ? 's' : ''}://${host}:${port}`;
 
       this.mqttClient = connect(connectUrl, options);
 
       this.mqttClient.on("connect", async () => {
           callback(this.mqttClient.connected)
+ 
           console.log(`Connected to MQTT server. clientID: <${clientId}> connectionUrl: ${connectUrl}`)
 
       });

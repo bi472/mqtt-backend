@@ -44,7 +44,7 @@ export class AuthService {
     return tokens;
   }
   
-  async  logout(userId: string): Promise<UserDocument> {
+  async logout(userId: string): Promise<UserDocument> {
     return await this.usersService.update(userId, { refreshToken: null });
   }
 

@@ -1,0 +1,28 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
+
+export type MqttOptionsDocument = MqttOptions & Document;
+
+@Schema()
+export class MqttOptions {
+    @Prop({ type: String, default: uuidv4 })
+    _id;
+
+    @Prop({ required: true, type: String })
+    host;
+
+    @Prop({ required: true, type: Number})
+    port;
+
+    @Prop({ required: true, type: String})
+    username;
+
+    @Prop({ required: true, type: String})
+    password;
+
+    @Prop({ type: Boolean })
+    sslConnection;
+}
+
+export const MqttOptionsSchema = SchemaFactory.createForClass(MqttOptions);
