@@ -1,30 +1,28 @@
 import { MqttService } from './mqtt.service';
 import { Body, Controller, Get, Logger, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
-import { MqttOptionsDto } from './dto/create-options'
+import { MqttOptionsDto } from './dto/base-options'
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
-import { UsersService } from 'src/users/users.service';
-import { MqttOptions } from './schemas/mqttOptions.schema';
 
 @Controller('mqtt')
 export class MqttController {
 
-  private logger= new Logger(MqttController.name);
+  private logger = new Logger(MqttController.name);
 
   constructor(
-    private readonly mqttService: MqttService,
-    private readonly userService: UsersService
+    private readonly mqttService: MqttService
     ) {}
 
   @UseGuards(AccessTokenGuard)
   @Get('connect')
   async connect(
-    @Body() mqttOptionsDto: Promise<MqttOptionsDto>,
-    @Req() req: Request
+    @Req() req: Request,
+    @Body() body: { mqttOptionsID: string , mqttOptionsDto: MqttOptionsDto }
   ): Promise<boolean>{
     return new Promise(
-      (resolve, reject) => {
-        this.mqttService.connect(mqttOptionsDto, 
+      async (resolve, reject) => {
+        const mqttOptionsDto = await this.mqttService.findUserMqttOptionsByID(body.mqttOptionsID, req.user['sub'])
+        this.mqttService.connect(mqttOptionsDto ? mqttOptionsDto : body.mqttOptionsDto, 
           (connected: boolean) => { resolve(connected) })
       }
     )
@@ -34,23 +32,17 @@ export class MqttController {
   @Post('mqttoptions')
   async createMqttOptions(
     @Req() req: Request,
-    @Body() body: MqttOptionsDto
+    @Body() mqttOptionsDto: MqttOptionsDto
   ) : Promise<any>{
-    
+    return await this.mqttService.createMqttOptions(mqttOptionsDto, req.user['sub'])
   }
 
   @UseGuards(AccessTokenGuard)
-  @Get('connect/:mqttOptionsID')
-  async connectBySavedOptions(
-    @Req() req: Request,
-    @Param() mqttOptionsID: string,
-  ): Promise<boolean>{
-    return new Promise(
-      (resolve, reject) => {
-        const mqttOptionsDto = this.userService.findUserMqttOptions(req.user['sub'])
-        
-      }
-    )
+  @Get('mqttoptions')
+  async findMqttOptions(
+    @Req() req: Request
+  ) : Promise<any>{
+    return await this.mqttService.findUserMqttOptions(req.user['sub'])
   }
 
 
