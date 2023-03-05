@@ -1,17 +1,4 @@
-import { IsNotEmpty } from "class-validator";
+import { PartialType } from '@nestjs/mapped-types';
+import { MqttOptionsDto } from './base-options';
 
-export class CreateMqttOptionsDto {
-    @IsNotEmpty({message: 'Please enter hostname'})
-    host: string;
-
-    @IsNotEmpty({message: 'Please enter port'})
-    port: number;
-
-    @IsNotEmpty({message: 'Please enter username'})
-    username: string;
-
-    @IsNotEmpty({message: 'Please enter password'})
-    password: string;
-    
-    sslConnection: boolean;
-}
+export class CreateMqttOptionsDto extends PartialType(MqttOptionsDto) {}

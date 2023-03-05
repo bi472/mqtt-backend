@@ -2,82 +2,100 @@ import { Injectable, Logger} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { connect } from "mqtt";
-import { CreateMqttOptionsDto, MqttOptionsDto} from './dto/create-options';
+import { TemplateDto } from 'src/templates/dto/base-template.dto';
+import { UsersService } from 'src/users/users.service';
+import { MqttOptionsDto } from './dto/base-options';
+import { CreateMqttOptionsDto} from './dto/create-options';
+
 import { MqttOptions, MqttOptionsDocument } from './schemas/mqttOptions.schema';
 
 @Injectable()
 export class MqttService{
 
-    constructor(
-      @InjectModel(MqttOptions.name) private mqttOptionsModel: Model<MqttOptionsDocument>
-    ) {}
+  constructor(
+    @InjectModel(MqttOptions.name) private mqttOptionsModel: Model<MqttOptionsDocument>,
+    private readonly usersService: UsersService
+  ) {}
 
-    private readonly logger = new Logger(MqttService.name);
-    private mqttClient;
+  private readonly logger = new Logger(MqttService.name);
+  private mqttClient;
 
-    async readMqttOptions(mqttOptionsID: string): Promise<MqttOptionsDto> {
-      return await this.mqttOptionsModel.findById(mqttOptionsID).exec()
+  async findUserTemplatesByID(templateID: string, userID: string) : Promise<TemplateDto>{
+    const template = await this.usersService.findUserTemplatesByID(userID, templateID)
+    return template?.at(0)
+  }
+
+  async findUserMqttOptionsByID(mqttOptionsID: string, userID: string) : Promise<MqttOptionsDto> {
+    const mqttOptions = await this.usersService.findUserMqttOptionsByID(userID, mqttOptionsID)
+    return mqttOptions?.at(0)
+  }
+
+  async findUserMqttOptions(userID: string): Promise<MqttOptionsDto[]> {
+    const mqttOptions = await this.usersService.findUserMqttOptions(userID);
+    return mqttOptions
+  }
+
+  async createMqttOptions(createMqttOptionsDto: CreateMqttOptionsDto, userID: string): Promise<MqttOptionsDto>{
+    const createdMqttOptions = new this.mqttOptionsModel(createMqttOptionsDto)
+    this.usersService.updateUserMqttOptions(userID, createdMqttOptions._id, )
+    return createdMqttOptions.save()
+  }
+
+
+  async connect(mqttOptionsDto: MqttOptionsDto, callback:(connected: boolean) => void): Promise<void> {
+    const host = (await mqttOptionsDto).host
+    const port = (await mqttOptionsDto).port
+    const username = (await mqttOptionsDto).username
+    const password = (await mqttOptionsDto).password
+    const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
+
+    const options = {
+      clientId,
+      clean: true,
+      connectTimeout: 4000,
+      username,
+      password,
+      reconnectPeriod: 10000,
+      rejectUnauthorized: false,
     }
 
-    async createMqttOptions(createMqttOptionsDto: CreateMqttOptionsDto): Promise<MqttOptionsDto>{
-      const createdMqttOptions = new this.mqttOptionsModel(createMqttOptionsDto)
-      return createdMqttOptions.save()
-    }
+    const connectUrl = `ws${(await mqttOptionsDto).sslConnection ? 's' : ''}://${host}:${port}`;
 
+    this.mqttClient = connect(connectUrl, options);
 
-    async connect(mqttOptionsDto: Promise<MqttOptionsDto>, callback:(connected: boolean) => void): Promise<void> {
-      const host = (await mqttOptionsDto).host
-      const port = (await mqttOptionsDto).port
-      const username = (await mqttOptionsDto).username
-      const password = (await mqttOptionsDto).password
-      const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
+    this.mqttClient.on("connect", async () => {
+        callback(this.mqttClient.connected)
 
-      const options = {
-        clientId,
-        clean: true,
-        connectTimeout: 4000,
-        username,
-        password,
-        reconnectPeriod: 10000,
-        rejectUnauthorized: false,
-      }
+        console.log(`Connected to MQTT server. clientID: <${clientId}> connectionUrl: ${connectUrl}`)
 
-      const connectUrl = `ws${(await mqttOptionsDto).sslConnection ? 's' : ''}://${host}:${port}`;
+    });
 
-      this.mqttClient = connect(connectUrl, options);
+    this.mqttClient.on("error",
+        (error) => {
+            callback(this.mqttClient.connected)
+            console.log(`MQTT client error: ${error}`);
+    })
+    .on("reconnect", () => {
+        console.log(`Reconnecting to MQTT server.`)
+    });
+  }
 
-      this.mqttClient.on("connect", async () => {
-          callback(this.mqttClient.connected)
- 
-          console.log(`Connected to MQTT server. clientID: <${clientId}> connectionUrl: ${connectUrl}`)
-
+  async subscribe(topic: string, callback: (message: string) => void): Promise<void> {
+    console.log(topic)
+      this.mqttClient.subscribe(topic, (err) => {
+        err ? this.logger.error(err): this.logger.log(`Subscribed to topic ${topic}`);
       });
-
-      this.mqttClient.on("error",
-          (error) => {
-              callback(this.mqttClient.connected)
-              console.log(`MQTT client error: ${error}`);
-      })
-      .on("reconnect", () => {
-          console.log(`Reconnecting to MQTT server.`)
+  
+      this.mqttClient.on('message', async (t, m) => {
+        if (t === topic) {
+          callback(m.toString());
+        }
       });
-    }
-
-    async subscribe(topic: string, callback: (message: string) => void): Promise<void> {
-        this.mqttClient.subscribe(topic, (err) => {
-          err ? this.logger.error(err): this.logger.log(`Subscribed to topic ${topic}`);
-        });
-    
-        this.mqttClient.on('message', async (t, m) => {
-          if (t === topic) {
-            callback(m.toString());
-          }
-        });
-      }
-    
-      publish(topic: string, message: string): void {
-        this.mqttClient.publish(topic, message, (err) => {
-          err ? this.logger.log(err) : this.logger.log(`Published message "${message}" to topic ${topic}`);
-          });
-      }
-    }
+  }
+  
+  async publish(topic: string, message: string): Promise<void> {
+    this.mqttClient.publish(topic, message, (err) => {
+      err ? this.logger.log(err) : this.logger.log(`Published message "${message}" to topic ${topic}`);
+      });
+  }
+}

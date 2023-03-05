@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateMqttOptionsDto } from 'src/mqtt/dto/create-options';
+import { MqttOptionsDto } from 'src/mqtt/dto/base-options';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 
 @Injectable()
 export class UsersService {
+  
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserDocument> {
@@ -15,14 +16,34 @@ export class UsersService {
     return createdUser.save();
   }
 
+  async findUserMqttOptionsByID(userID: string, mqttOptionsID: string): Promise<MqttOptionsDto[]> {
+    const userData = await this.userModel.findOne({id: userID, mqttOptions: mqttOptionsID}).populate('mqttOptions').exec()
+    return userData?.mqttOptions
+  }
+
   async findUserMqttOptions(userID: string): Promise<MqttOptionsDto[]> {
     const userData = await this.userModel.findOne({id: userID}).populate('mqttOptions').exec()
-    return userData.mqttOptions;
+    return userData?.mqttOptions;
   }
 
   async findUserTemplates(userID: string): Promise<any>{
     const userData = await this.userModel.findOne({id: userID}).populate('templates').exec()
-    return userData.templates;
+    return userData?.templates;
+  }
+
+  async findUserTemplatesByID(userID: string, templateID: string): Promise<any>{
+    const userData = await this.userModel.findOne({id: userID, templates: templateID}).populate('templates').exec()
+    return userData?.templates;
+  }
+
+  async updateUserMqttOptions(userID: string, mqttOptionsID: string) {
+    return await this.userModel
+      .findOneAndUpdate(
+        {id: userID},
+        {$push: {mqttOptions: mqttOptionsID}},
+        {new: true}
+      )
+      .exec()
   }
 
   async updateUserTemplates(id: string, templateID: string) {
