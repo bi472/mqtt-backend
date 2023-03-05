@@ -51,18 +51,12 @@ export class MqttController {
   async subscribe(
     @Req() req: Request,
     @Body() body: { topic: string, templateID: string},
-  ): Promise<{ message: string }> {
-      return new Promise( 
-        async (resolve, reject) => {
-          const template = await this.mqttService.findUserTemplatesByID(body.templateID, req.user['sub'])
-          console.log(template.topic)
-          this.mqttService.subscribe(template.topic, 
-            (message: string) => {
-                this.logger.log(`Received message on ${body.topic}: ${message}`) 
-                resolve({message})
-            }
-          );
-      })
+  ) {
+      const template = await this.mqttService.findUserTemplatesByID(body.templateID, req.user['sub'])
+      this.mqttService.subscribe(template.topic, 
+        (message: string) => {
+            this.logger.log(`Received message on ${template.topic}: ${message}`) 
+        })
     }
   
   @UseGuards(AccessTokenGuard)
@@ -72,6 +66,7 @@ export class MqttController {
     @Body() body: { topic: string, message: string, templateID: string},
   ): Promise<string> {
     const template = await this.mqttService.findUserTemplatesByID(body.templateID, req.user['sub'])
+    console.log(template.topic, template.message)
     this.mqttService.publish(body.topic ? body.topic : template.topic, body.message ? body.message : template.message);
     return `Published ${body.message} to ${body.topic}`;
   }

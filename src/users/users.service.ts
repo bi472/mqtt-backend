@@ -17,8 +17,8 @@ export class UsersService {
   }
 
   async findUserMqttOptionsByID(userID: string, mqttOptionsID: string): Promise<MqttOptionsDto[]> {
-    const userData = await this.userModel.findOne({id: userID, mqttOptions: mqttOptionsID}).populate('mqttOptions').exec()
-    return userData?.mqttOptions
+    const userData = await this.userModel.findOne({id: userID}).populate('mqttOptions').exec()
+    return userData.mqttOptions.filter(el => el._id === mqttOptionsID)
   }
 
   async findUserMqttOptions(userID: string): Promise<MqttOptionsDto[]> {
@@ -32,8 +32,9 @@ export class UsersService {
   }
 
   async findUserTemplatesByID(userID: string, templateID: string): Promise<any>{
-    const userData = await this.userModel.findOne({id: userID, templates: templateID}).populate('templates').exec()
-    return userData?.templates;
+    console.log(templateID)
+    const userData = await this.userModel.findOne({id: userID}).populate('templates').exec()
+    return userData.templates.filter(el => el._id === templateID);
   }
 
   async updateUserMqttOptions(userID: string, mqttOptionsID: string) {
