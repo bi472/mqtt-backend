@@ -19,6 +19,7 @@ export class MqttController {
     @Req() req: Request,
     @Body() body: { mqttOptionsID: string , mqttOptionsDto: MqttOptionsDto }
   ): Promise<boolean>{
+    
     return new Promise(
       async (resolve, reject) => {
         const mqttOptionsDto = await this.mqttService.findUserMqttOptionsByID(body.mqttOptionsID, req.user['sub'])
@@ -66,7 +67,6 @@ export class MqttController {
     @Body() body: { topic: string, message: string, templateID: string},
   ): Promise<string> {
     const template = await this.mqttService.findUserTemplatesByID(body.templateID, req.user['sub'])
-    console.log(template.topic, template.message)
     this.mqttService.publish(body.topic ? body.topic : template.topic, body.message ? body.message : template.message);
     return `Published ${body.message} to ${body.topic}`;
   }
