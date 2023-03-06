@@ -32,7 +32,6 @@ export class UsersService {
   }
 
   async findUserTemplatesByID(userID: string, templateID: string): Promise<any>{
-    console.log(templateID)
     const userData = await this.userModel.findOne({id: userID}).populate('templates').exec()
     return userData.templates.filter(el => el._id === templateID);
   }

@@ -66,22 +66,28 @@ export class MqttService{
     this.mqttClient.on("connect", async () => {
         callback(this.mqttClient.connected)
 
-        console.log(`Connected to MQTT server. clientID: <${clientId}> connectionUrl: ${connectUrl}`)
+        this.logger.log(`Connected to MQTT server. clientID: <${clientId}> connectionUrl: ${connectUrl}`)
 
     });
 
     this.mqttClient.on("error",
         (error) => {
             callback(this.mqttClient.connected)
-            console.log(`MQTT client error: ${error}`);
+            this.logger.log(`MQTT client error: ${error}`);
+            this.mqttClient.end()
     })
     .on("reconnect", () => {
-        console.log(`Reconnecting to MQTT server.`)
+      this.logger.log(`Reconnecting to MQTT server.`)
+    })
+    .on('close', () => {
+      this.logger.log(`Closed connection to MQTT server. clientID: <${clientId}> connectionUrl: ${connectUrl}`)
     });
   }
 
+  async disconnect() {
+  }
+
   async subscribe(topic: string, callback: (message: string) => void): Promise<void> {
-    console.log(topic)
       this.mqttClient.subscribe(topic, (err) => {
         err ? this.logger.error(err): this.logger.log(`Subscribed to topic ${topic}`);
       });
