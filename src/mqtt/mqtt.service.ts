@@ -22,12 +22,13 @@ export class MqttService{
 
   async findUserTemplatesByID(templateID: string, userID: string) : Promise<TemplateDto>{
     const template = await this.usersService.findUserTemplatesByID(userID, templateID)
-    return template?.at(0)
+    return template
   }
 
   async findUserMqttOptionsByID(mqttOptionsID: string, userID: string) : Promise<MqttOptionsDto> {
     const mqttOptions = await this.usersService.findUserMqttOptionsByID(userID, mqttOptionsID)
-    return mqttOptions?.at(0)
+    console.log(mqttOptions)
+    return mqttOptions
   }
 
   async findUserMqttOptions(userID: string): Promise<MqttOptionsDto[]> {
@@ -48,6 +49,8 @@ export class MqttService{
     const username = (await mqttOptionsDto).username
     const password = (await mqttOptionsDto).password
     const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
+
+    console.log(username, password)
 
     const options = {
       clientId,

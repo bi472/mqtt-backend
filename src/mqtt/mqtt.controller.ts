@@ -1,5 +1,5 @@
 import { MqttService } from './mqtt.service';
-import { Body, Controller, Get, Logger, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, InternalServerErrorException, Logger, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { MqttOptionsDto } from './dto/base-options'
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
@@ -18,15 +18,25 @@ export class MqttController {
   async connect(
     @Req() req: Request,
     @Body() body: { mqttOptionsID: string , mqttOptionsDto: MqttOptionsDto }
-  ): Promise<boolean>{
+  ): Promise<any>{
+
+    try {
+      
     
-    return new Promise(
+    const promise =  new Promise(
       async (resolve, reject) => {
+        console.log(body.mqttOptionsID)
         const mqttOptionsDto = await this.mqttService.findUserMqttOptionsByID(body.mqttOptionsID, req.user['sub'])
         this.mqttService.connect(mqttOptionsDto ? mqttOptionsDto : body.mqttOptionsDto, 
           (connected: boolean) => { resolve(connected) })
       }
     )
+
+    return promise
+    }
+    catch(e) {
+      console.log('Catch an error: ', e)
+    }
   }
 
   @UseGuards(AccessTokenGuard)
