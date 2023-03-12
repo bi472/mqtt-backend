@@ -31,6 +31,16 @@ export class TemplatesService {
         {new: true}).exec()
   }
 
+  async delete(userID: string, templateID: string): Promise<TemplateDocument>
+  {
+    const userData = (await this.usersService.findById(userID))
+    const templateIDx = userData.templates.findIndex(el => el.toString() === templateID)
+    if(templateIDx == -1)
+      throw new ForbiddenException('Forbidden')
+    else
+      return this.templateModel.findOneAndDelete( {_id: templateID} ).exec()
+  }
+
   async findUserTemplates(userID: string): Promise<TemplateDocument[]> {
     return await this.usersService.findUserTemplates(userID)
   }

@@ -11,26 +11,35 @@ export class TemplatesController {
 
   @UseGuards(AccessTokenGuard)
   @Post()
-  create(
+  async create(
     @Body() createTemplateDto: CreateTemplateDto,
     @Req() req: Request
   ) {
-    return this.templatesService.create(createTemplateDto, req.user['sub']);
+    return await this.templatesService.create(createTemplateDto, req.user['sub']);
   }
 
   @UseGuards(AccessTokenGuard)
   @Post(':templateID')
-  update(
+  async update(
     @Param('templateID') templateID: string,
     @Body() updateTemplateDto: UpdateTemplateDto,
     @Req() req: Request
   ): Promise<UpdateTemplateDto>{
-    return this.templatesService.update(updateTemplateDto, req.user['sub'], templateID)
+    return await this.templatesService.update(updateTemplateDto, req.user['sub'], templateID)
   }
 
   @UseGuards(AccessTokenGuard)
   @Get()
-  findUsersTemplates(@Req() req: Request){
-    return this.templatesService.findUserTemplates(req.user['sub'])
+  async findAll(@Req() req: Request){
+    return await this.templatesService.findUserTemplates(req.user['sub'])
   }
+
+  @UseGuards(AccessTokenGuard)
+  @Delete(':templateID')
+  async delete(
+    @Req() req: Request, 
+    @Param('templateID') templateID: string
+  ){
+    return await this.templatesService.delete(req.user['sub'], templateID)
+  } 
 }

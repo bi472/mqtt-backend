@@ -1,4 +1,4 @@
-import { Injectable, Logger} from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { connect } from "mqtt";
@@ -6,6 +6,7 @@ import { TemplateDto } from 'src/templates/dto/base-template.dto';
 import { UsersService } from 'src/users/users.service';
 import { MqttOptionsDto } from './dto/base-options';
 import { CreateMqttOptionsDto} from './dto/create-options';
+import { UpdateMqttOptionsDto } from './dto/update-options';
 
 import { MqttOptions, MqttOptionsDocument } from './schemas/mqttOptions.schema';
 
@@ -27,7 +28,6 @@ export class MqttService{
 
   async findUserMqttOptionsByID(mqttOptionsID: string, userID: string) : Promise<MqttOptionsDto> {
     const mqttOptions = await this.usersService.findUserMqttOptionsByID(userID, mqttOptionsID)
-    console.log(mqttOptions)
     return mqttOptions
   }
 
@@ -40,6 +40,27 @@ export class MqttService{
     const createdMqttOptions = new this.mqttOptionsModel(createMqttOptionsDto)
     this.usersService.updateUserMqttOptions(userID, createdMqttOptions._id, )
     return createdMqttOptions.save()
+  }
+
+  async updateMqttOption(userID: string, mqttOptionsID: string, updateMqttOptionsDto: UpdateMqttOptionsDto): Promise<MqttOptionsDto> {
+    const userData = (await this.usersService.findById(userID))
+    const mqttOptionsIDx = userData.mqttOptions.findIndex(el => el.toString() === mqttOptionsID)
+    if(mqttOptionsIDx == -1)
+      throw new ForbiddenException('Forbidden')
+    else
+      return this.mqttOptionsModel.findOneAndUpdate(
+        {_id: mqttOptionsID},
+        updateMqttOptionsDto,
+        {new: true}).exec()
+  }
+
+  async deleteMqttOption(userID: any, mqttOptionsID: string): Promise<MqttOptionsDto> {
+    const userData = (await this.usersService.findById(userID))
+    const mqttOptionsIDx = userData.mqttOptions.findIndex(el => el.toString() === mqttOptionsID)
+    if(mqttOptionsIDx == -1)
+      throw new ForbiddenException('Forbidden')
+    else
+      return this.mqttOptionsModel.findOneAndDelete( {_id: mqttOptionsID}).exec()
   }
 
 

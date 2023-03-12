@@ -4,7 +4,7 @@ version: '3'
 services:
   nestapp:
     container_name: nestapp
-    image: mqtt-backend
+    image: fnder7/mqtt-backend
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,7 +17,7 @@ services:
 
   mongodb:
     container_name: database
-    image: mongo
+    image: fnder7/mongo
     restart: always
     ports:
       - "27017:27017"
