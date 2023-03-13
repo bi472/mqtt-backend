@@ -45,7 +45,7 @@ export class MqttService{
   async updateMqttOption(userID: string, mqttOptionsID: string, updateMqttOptionsDto: UpdateMqttOptionsDto): Promise<MqttOptionsDto> {
     const userData = (await this.usersService.findById(userID))
     const mqttOptionsIDx = userData.mqttOptions.findIndex(el => el.toString() === mqttOptionsID)
-    if(mqttOptionsIDx == -1)
+    if(mqttOptionsIDx === -1)
       throw new ForbiddenException('Forbidden')
     else
       return this.mqttOptionsModel.findOneAndUpdate(
