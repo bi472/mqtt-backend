@@ -60,7 +60,6 @@ export class AuthService {
       refreshToken: hashedRefreshToken,
     });
   }
-
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.usersService.findById(userId);
     if (!user || !user.refreshToken)
