@@ -41,7 +41,7 @@ export class MqttController {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Post('mqttoptions')
+  @Post('mqttoptions') 
   async createMqttOption(
     @Req() req: Request,
     @Body() mqttOptionsDto: MqttOptionsDto
@@ -64,7 +64,7 @@ export class MqttController {
     @Param('mqttOptionsID') mqttOptionsID: string,
     @Body() body: UpdateMqttOptionsDto
   ) : Promise<any>{
-    return await this.mqttService.updateMqttOption(req.user['sub'], mqttOptionsID, body.mqttOptionsDto)
+    return await this.mqttService.updateMqttOption(req.user['sub'], mqttOptionsID, body)
   }
 
   @UseGuards(AccessTokenGuard)
