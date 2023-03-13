@@ -4,13 +4,17 @@ import {
   Get,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response as ResponseType } from 'express';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
+import { RefreshTokenGuard } from 'src/common/guards/refreshToken.guard';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
+
+
 
 @Controller('auth')
 export class AuthController {
@@ -22,13 +26,29 @@ export class AuthController {
   }
 
   @Post('signin')
-  signin(@Body() data: AuthDto) {
-    return this.authService.signIn(data);
+  async signin(
+    @Body() data: AuthDto,
+    @Res({ passthrough: true }) res: ResponseType ){
+      const authToken = await this.authService.signIn(data);
+      this.authService.storeTokenInCookie(res, authToken)
+      return authToken
   }
 
   @UseGuards(AccessTokenGuard)
   @Get('logout')
   logout(@Req() req: Request) {
     this.authService.logout(req.user['sub']);
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @Get('refresh')
+  async refreshTokens(
+    @Req() req: Request, 
+    @Res({ passthrough: true }) res: ResponseType
+  ) {
+    const refreshToken = req.cookies.refreshToken;
+    const newAuthToken = await this.authService.refreshTokens(req.user['sub'], refreshToken);
+    this.authService.storeTokenInCookie(res, newAuthToken);
+    return newAuthToken
   }
 }
