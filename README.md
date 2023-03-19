@@ -1,49 +1,58 @@
-## Description
+# Project Title
+mqtt-backend
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Demo link:
+Get hello from [mqtt-backend](http://77.91.78.138:3000/).
 
-## Installation
+## Documentation
+Coming soon.
 
+## Table of Content:
+
+- [About The App](#about-the-app)
+- [Screenshots](#screenshots)
+- [Technologies](#technologies)
+- [Setup with Docker](#setup)
+- [Envoroment variables](#setup)
+- [Status](#status)
+- [Credits](#credits)
+- [License](#license)
+
+## About The App
+mqtt-backend is app with authentication to communiucate with MQTT Server.
+
+## Technologies
+I used `Nest JS`, `MongoDB`, `Docker`.
+
+## Setup
 ```bash
-$ npm install
+git clone https://github.com/bi472/mqtt-backend.git
+cd mqtt-backend
+
+#Create .env file
+.....
+
+docker compose up -d nestapp
+```
+Done!
+
+## Enviroment Variables
+```env
+port = 3000
+
+mongoURL = "mongodb://mongodb:27017"
+
+JWT_ACCESS_SECRET = <your secret access code>
+JWT_REFRESH_SECRET = <your secret refresh code>
 ```
 
-## Running the app
+## Status
+[mqtt-backend] is still in progress. Working with documentation.
 
-```bash
-# development
-$ npm run start
+## Credits
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+......
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+.....
