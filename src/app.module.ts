@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -12,7 +12,13 @@ import { TemplatesModule } from './templates/templates.module';
   imports: [
     ConfigModule.forRoot(),
     MqttModule,
-    MongooseModule.forRoot(process.env.mongoURL),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async(configService: ConfigService) => ({
+        uri: configService.get('mongoURL'),
+      }),
+      inject: [ConfigService]
+    }),
     UsersModule,
     AuthModule,
     TemplatesModule

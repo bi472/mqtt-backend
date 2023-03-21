@@ -7,12 +7,14 @@ import { AuthDto } from './dto/auth.dto';
 import { UserDocument } from 'src/users/schemas/user.schema';
 import { AuthTokenDto } from './dto/auth.token.dto';
 import { Response as ResponseType} from 'express'
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService
   ) {}
 
   async signUp(createUserDto: CreateUserDto): Promise<any> {
@@ -82,7 +84,7 @@ export class AuthService {
           username,
         },
         {
-          secret: process.env.JWT_ACCESS_SECRET,
+          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
           expiresIn: '15m',
         },
       ),
@@ -92,7 +94,7 @@ export class AuthService {
           username,
         },
         {
-          secret: process.env.JWT_REFRESH_SECRET,
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
           expiresIn: '7d',
         },
       ),
