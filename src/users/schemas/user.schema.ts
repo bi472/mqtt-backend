@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { MqttOptions } from 'src/mqtt/schemas/mqttOptions.schema';
+import { MqttOptions } from 'src/mqttoptions/schemas/mqttOptions.schema';
 import { Template } from 'src/templates/schemas/template.schema';
 import { v4 as uuidv4 } from 'uuid';
 

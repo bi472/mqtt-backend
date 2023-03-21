@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { MqttOptionsDto } from 'src/mqtt/dto/base-options';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
@@ -16,46 +15,6 @@ export class UsersService {
     return createdUser.save();
   }
 
-  async findUserMqttOptionsByID(userID: string, mqttOptionsID: string): Promise<MqttOptionsDto> {
-    const userData = await this.userModel.findOne({id: userID}).populate('mqttOptions').exec()
-    return userData.mqttOptions.filter(el => el._id === mqttOptionsID).at(0)
-  }
-
-  async findUserMqttOptions(userID: string): Promise<MqttOptionsDto[]> {
-    const userData = await this.userModel.findOne({id: userID}).populate('mqttOptions').exec()
-    return userData?.mqttOptions;
-  }
-
-  async findUserTemplates(userID: string): Promise<any>{
-    const userData = await this.userModel.findOne({id: userID}).populate('templates').exec()
-    return userData?.templates;
-  }
-
-  async findUserTemplatesByID(userID: string, templateID: string): Promise<any>{
-    const userData = await this.userModel.findOne({id: userID}).populate('templates').exec()
-    return userData.templates.filter(el => el._id === templateID).at(0);
-  }
-
-  async updateUserMqttOptions(userID: string, mqttOptionsID: string) {
-    return await this.userModel
-      .findOneAndUpdate(
-        {id: userID},
-        {$push: {mqttOptions: mqttOptionsID}},
-        {new: true}
-      )
-      .exec()
-  }
-
-  async updateUserTemplates(id: string, templateID: string) {
-    return await this.userModel
-      .findOneAndUpdate(
-        {id},
-        {$push: {templates: templateID}},
-        {new: true}
-      )
-      .exec()
-  }
-
   async findByUsername(username: string): Promise<UserDocument>{
     return this.userModel.findOne({username}).exec();
   }
@@ -64,6 +23,15 @@ export class UsersService {
     return this.userModel.findOne({id}).exec();
   }
 
+  async push(id: string, columnName: string, value: string){
+    this.userModel
+      .findOneAndUpdate(
+        {id},
+        {$push: {columnName: value}},
+        {new: true}
+      )
+      .exec()
+  }
   async update(
     id: string,
     updateUserDto: UpdateUserDto,

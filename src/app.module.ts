@@ -7,6 +7,7 @@ import { MqttModule } from './mqtt/mqtt.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TemplatesModule } from './templates/templates.module';
+import { MqttoptionsModule } from './mqttoptions/mqttoptions.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { TemplatesModule } from './templates/templates.module';
     }),
     UsersModule,
     AuthModule,
-    TemplatesModule
+    TemplatesModule,
+    MqttoptionsModule
   ],
   controllers: [AppController],
   providers: [AppService],
