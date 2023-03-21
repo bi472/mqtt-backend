@@ -9,13 +9,12 @@ import { Template, TemplateDocument } from './schemas/template.schema';
 @Injectable()
 export class TemplatesService {
   constructor(
-    @InjectModel(Template.name) private templateModel: Model<TemplateDocument>,
-    private usersService: UsersService
+    @InjectModel(Template.name) private readonly templateModel: Model<TemplateDocument>,
+    private readonly usersService: UsersService
   ) {}
   
   async create(createTemplateDto: CreateTemplateDto, userID: string): Promise<TemplateDocument> {
     const createdTemplate = new this.templateModel(createTemplateDto);
-    this.usersService.updateUserTemplates(userID, createdTemplate.id)
     return createdTemplate.save();
   }
 
@@ -42,6 +41,7 @@ export class TemplatesService {
   }
 
   async findUserTemplates(userID: string): Promise<TemplateDocument[]> {
-    return await this.usersService.findUserTemplates(userID)
+    const userData = (await this.usersService.findById(userID))
+    return userData['templates']
   }
 }

@@ -8,7 +8,7 @@ import { UpdateMqttOptionsDto } from './dto/update-options';
 import { MqttOptions, MqttOptionsDocument } from './schemas/mqttOptions.schema';
 
 @Injectable()
-export class MqttoptionsService {
+export class MqttOptionsService {
   constructor(
     private readonly usersService: UsersService,
     @InjectModel(MqttOptions.name) private mqttOptionsModel: Model<MqttOptionsDocument>

@@ -3,6 +3,8 @@ import { BadRequestException, Body, Controller, Delete, Get, InternalServerError
 import { Request } from 'express';
 import { MqttOptionsDto } from '../mqttoptions/dto/base-options'
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
+import { MqttOptionsService } from 'src/mqttoptions/mqttoptions.service';
+import { TemplatesService } from 'src/templates/templates.service';
 
 @Controller('mqtt')
 export class MqttController {
@@ -10,7 +12,9 @@ export class MqttController {
   private logger = new Logger(MqttController.name);
 
   constructor(
-    private readonly mqttService: MqttService
+    private readonly mqttService: MqttService,
+    private readonly mqttOptionsService: MqttOptionsService,
+    private readonly templatesService: TemplatesService
     ) {}
 
   @UseGuards(AccessTokenGuard)
@@ -26,7 +30,7 @@ export class MqttController {
     const promise =  new Promise(
       async (resolve, reject) => {
         console.log(body.mqttOptionsID)
-        const mqttOptionsDto = await this.mqttService.findUserMqttOptionsByID(body.mqttOptionsID, req.user['sub'])
+        const mqttOptionsDto = await this.mqttOptionsService.findUserMqttOptionsByID(body.mqttOptionsID, req.user['sub'])
         this.mqttService.connect(mqttOptionsDto ? mqttOptionsDto : body.mqttOptionsDto, 
           (connected: boolean) => { resolve(connected) })
       }
@@ -46,7 +50,7 @@ export class MqttController {
     @Req() req: Request,
     @Body() body: { topic: string, templateID: string},
   ) {
-      const template = await this.mqttService.findUserTemplatesByID(body.templateID, req.user['sub'])
+      const template = await this.templatesService.findUserTemplatesByID(body.templateID, req.user['sub'])
       this.mqttService.subscribe(template.topic, 
         (message: string) => {
             this.logger.log(`Received message on ${template.topic}: ${message}`) 
@@ -59,7 +63,7 @@ export class MqttController {
     @Req() req: Request,
     @Body() body: { topic: string, message: string, templateID: string},
   ): Promise<string> {
-    const template = await this.mqttService.findUserTemplatesByID(body.templateID, req.user['sub'])
+    const template = await this.templatesService.findUserTemplatesByID(body.templateID, req.user['sub'])
     this.mqttService.publish(body.topic ? body.topic : template.topic, body.message ? body.message : template.message);
     return `Published ${body.message} to ${body.topic}`;
   }

@@ -3,11 +3,11 @@ import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { MqttOptionsDto } from './dto/base-options';
 import { Request } from 'express';
 import { UpdateMqttOptionsDto } from './dto/update-options';
-import { MqttoptionsService } from './mqttoptions.service';
+import { MqttOptionsService } from './mqttoptions.service';
 
 @Controller('mqttoptions')
-export class MqttoptionsController {
-  constructor(private readonly mqttoptionsService: MqttoptionsService) {}
+export class MqttOptionsController {
+  constructor(private readonly mqttOptionsService: MqttOptionsService) {}
 
   @UseGuards(AccessTokenGuard)
   @Post() 
@@ -15,7 +15,7 @@ export class MqttoptionsController {
     @Req() req: Request,
     @Body() mqttOptionsDto: MqttOptionsDto
   ) : Promise<any>{
-    return await this.mqttoptionsService.createMqttOptions(mqttOptionsDto, req.user['sub'])
+    return await this.mqttOptionsService.createMqttOptions(mqttOptionsDto, req.user['sub'])
   }
 
   @UseGuards(AccessTokenGuard)
@@ -23,7 +23,7 @@ export class MqttoptionsController {
   async findMqttOptions(
     @Req() req: Request
   ) : Promise<any>{
-    return await this.mqttoptionsService.findUserMqttOptions(req.user['sub'])
+    return await this.mqttOptionsService.findUserMqttOptions(req.user['sub'])
   }
 
   @UseGuards(AccessTokenGuard)
@@ -33,7 +33,7 @@ export class MqttoptionsController {
     @Param('mqttOptionsID') mqttOptionsID: string,
     @Body() body: UpdateMqttOptionsDto
   ) : Promise<any>{
-    return await this.mqttoptionsService.updateMqttOption(req.user['sub'], mqttOptionsID, body)
+    return await this.mqttOptionsService.updateMqttOption(req.user['sub'], mqttOptionsID, body)
   }
 
   @UseGuards(AccessTokenGuard)
@@ -42,6 +42,6 @@ export class MqttoptionsController {
     @Req() req: Request,
     @Param('mqttOptionsID') mqttOptionsID: string
   ) : Promise<any>{
-    return await this.mqttoptionsService.deleteMqttOption(req.user['sub'], mqttOptionsID)
+    return await this.mqttOptionsService.deleteMqttOption(req.user['sub'], mqttOptionsID)
   }
 }

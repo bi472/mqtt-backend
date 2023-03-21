@@ -1,11 +1,7 @@
 import { Injectable, Logger} from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { connect } from "mqtt";
-import { UsersService } from 'src/users/users.service';
-import { MqttOptionsDto } from './dto/base-options';
+import { MqttOptionsDto } from '../mqttoptions/dto/base-options';
 
-import { MqttOptions, MqttOptionsDocument } from '../mqttoptions/schemas/mqttOptions.schema';
 
 @Injectable()
 export class MqttService{

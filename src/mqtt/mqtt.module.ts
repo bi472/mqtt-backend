@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from 'src/users/users.module';
 import { MqttController } from './mqtt.controller';
 import { MqttService } from './mqtt.service';
-import { MqttOptions, MqttOptionsSchema } from '../mqttoptions/schemas/mqttOptions.schema';
+import { MqttOptionsService } from 'src/mqttoptions/mqttoptions.service';
+import { TemplatesService } from 'src/templates/templates.service';
 
 @Module({
     imports: [
@@ -12,7 +12,7 @@ import { MqttOptions, MqttOptionsSchema } from '../mqttoptions/schemas/mqttOptio
         UsersModule,
     ],
     controllers: [MqttController],
-    providers: [MqttService],
+    providers: [MqttService, MqttOptionsService, TemplatesService],
 })
 
 export class MqttModule {
