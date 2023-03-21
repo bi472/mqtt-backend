@@ -22,13 +22,13 @@ export class RefreshTokenStrategy extends PassportStrategy(
   }
 
   async validate(req: Request, payload: any) {
-    const refreshToken = req.get('Authorization').replace('Bearer', '').trim();
+    const refreshToken = req.get('Authorization') !== undefined ? req.get('Authorization').replace('Bearer', '').trim() : req.cookies.refreshToken;
     return { ...payload, refreshToken };
   }
 
   private static extractJWT(req: RequestType): string | null {
     if (req.cookies && 'refreshToken' in req.cookies) {
-      return req.cookies.refresh_token;
+      return req.cookies.refreshToken;
     }
     return null;
   }
