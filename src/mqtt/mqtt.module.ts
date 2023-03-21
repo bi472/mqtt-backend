@@ -4,12 +4,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from 'src/users/users.module';
 import { MqttController } from './mqtt.controller';
 import { MqttService } from './mqtt.service';
-import { MqttOptions, MqttOptionsSchema } from './schemas/mqttOptions.schema';
+import { MqttOptions, MqttOptionsSchema } from '../mqttoptions/schemas/mqttOptions.schema';
 
 @Module({
     imports: [
         ConfigModule.forRoot(),
-        MongooseModule.forFeature([{ name: MqttOptions.name, schema: MqttOptionsSchema }]),
         UsersModule,
     ],
     controllers: [MqttController],

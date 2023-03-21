@@ -1,9 +1,8 @@
 import { MqttService } from './mqtt.service';
 import { BadRequestException, Body, Controller, Delete, Get, InternalServerErrorException, Logger, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
-import { MqttOptionsDto } from './dto/base-options'
+import { MqttOptionsDto } from '../mqttoptions/dto/base-options'
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
-import { UpdateMqttOptionsDto } from './dto/update-options';
 
 @Controller('mqtt')
 export class MqttController {
@@ -38,42 +37,6 @@ export class MqttController {
     catch(e) {
       console.log('Catch an error: ', e)
     }
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @Post('mqttoptions') 
-  async createMqttOption(
-    @Req() req: Request,
-    @Body() mqttOptionsDto: MqttOptionsDto
-  ) : Promise<any>{
-    return await this.mqttService.createMqttOptions(mqttOptionsDto, req.user['sub'])
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @Get('mqttoptions')
-  async findMqttOptions(
-    @Req() req: Request
-  ) : Promise<any>{
-    return await this.mqttService.findUserMqttOptions(req.user['sub'])
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @Post('mqttoptions/:mqttOptionsID')
-  async updateMqttOption(
-    @Req() req: Request,
-    @Param('mqttOptionsID') mqttOptionsID: string,
-    @Body() body: UpdateMqttOptionsDto
-  ) : Promise<any>{
-    return await this.mqttService.updateMqttOption(req.user['sub'], mqttOptionsID, body)
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @Delete('mqttoptions/:mqttOptionsID')
-  async deleteMqttOption(
-    @Req() req: Request,
-    @Param('mqttOptionsID') mqttOptionsID: string
-  ) : Promise<any>{
-    return await this.mqttService.deleteMqttOption(req.user['sub'], mqttOptionsID)
   }
 
 

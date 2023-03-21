@@ -1,68 +1,19 @@
-import { ForbiddenException, Injectable, Logger} from '@nestjs/common';
+import { Injectable, Logger} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { connect } from "mqtt";
-import { TemplateDto } from 'src/templates/dto/base-template.dto';
 import { UsersService } from 'src/users/users.service';
 import { MqttOptionsDto } from './dto/base-options';
-import { CreateMqttOptionsDto} from './dto/create-options';
-import { UpdateMqttOptionsDto } from './dto/update-options';
 
-import { MqttOptions, MqttOptionsDocument } from './schemas/mqttOptions.schema';
+import { MqttOptions, MqttOptionsDocument } from '../mqttoptions/schemas/mqttOptions.schema';
 
 @Injectable()
 export class MqttService{
 
-  constructor(
-    @InjectModel(MqttOptions.name) private mqttOptionsModel: Model<MqttOptionsDocument>,
-    private readonly usersService: UsersService
-  ) {}
+  constructor() {}
 
   private readonly logger = new Logger(MqttService.name);
   private mqttClient;
-
-  async findUserTemplatesByID(templateID: string, userID: string) : Promise<TemplateDto>{
-    const template = await this.usersService.findUserTemplatesByID(userID, templateID)
-    return template
-  }
-
-  async findUserMqttOptionsByID(mqttOptionsID: string, userID: string) : Promise<MqttOptionsDto> {
-    const mqttOptions = await this.usersService.findUserMqttOptionsByID(userID, mqttOptionsID)
-    return mqttOptions
-  }
-
-  async findUserMqttOptions(userID: string): Promise<MqttOptionsDto[]> {
-    const mqttOptions = await this.usersService.findUserMqttOptions(userID);
-    return mqttOptions
-  }
-
-  async createMqttOptions(createMqttOptionsDto: CreateMqttOptionsDto, userID: string): Promise<MqttOptionsDto>{
-    const createdMqttOptions = new this.mqttOptionsModel(createMqttOptionsDto)
-    this.usersService.updateUserMqttOptions(userID, createdMqttOptions._id, )
-    return createdMqttOptions.save()
-  }
-
-  async updateMqttOption(userID: string, mqttOptionsID: string, updateMqttOptionsDto: UpdateMqttOptionsDto): Promise<MqttOptionsDto> {
-    const userData = (await this.usersService.findById(userID))
-    const mqttOptionsIDx = userData.mqttOptions.findIndex(el => el.toString() === mqttOptionsID)
-    if(mqttOptionsIDx === -1)
-      throw new ForbiddenException('Forbidden')
-    else
-      return this.mqttOptionsModel.findOneAndUpdate(
-        {_id: mqttOptionsID},
-        updateMqttOptionsDto,
-        {new: true}).exec()
-  }
-
-  async deleteMqttOption(userID: any, mqttOptionsID: string): Promise<MqttOptionsDto> {
-    const userData = (await this.usersService.findById(userID))
-    const mqttOptionsIDx = userData.mqttOptions.findIndex(el => el.toString() === mqttOptionsID)
-    if(mqttOptionsIDx == -1)
-      throw new ForbiddenException('Forbidden')
-    else
-      return this.mqttOptionsModel.findOneAndDelete( {_id: mqttOptionsID}).exec()
-  }
-
 
   async connect(mqttOptionsDto: MqttOptionsDto, callback:(connected: boolean) => void): Promise<void> {
     const host = (await mqttOptionsDto).host
