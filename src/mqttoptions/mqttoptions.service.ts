@@ -22,12 +22,12 @@ export class MqttOptionsService {
     if(mqttOptionsIDx === -1)
       throw new ForbiddenException('Forbidden')
     else
-      return this.mqttOptionsModel.findById({id: userID}).exec()
+      return this.mqttOptionsModel.findOne({id: userID}).exec()
   }
 
   async findUserMqttOptions(userID: string): Promise<MqttOptionsDto[]> {
-    const userData = (await this.usersService.findById(userID))
-    return userData.mqttOptions
+    const userData = (await this.usersService.findById(userID)).populate('mqttOptions')
+    return (await userData).mqttOptions
   }
 
   async createMqttOptions(createMqttOptionsDto: CreateMqttOptionsDto, userID: string): Promise<MqttOptionsDto>{

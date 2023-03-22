@@ -15,6 +15,7 @@ export class TemplatesService {
   
   async create(createTemplateDto: CreateTemplateDto, userID: string): Promise<TemplateDocument> {
     const createdTemplate = new this.templateModel(createTemplateDto);
+    this.usersService.push(userID, 'templates', createdTemplate._id)
     return createdTemplate.save();
   }
 

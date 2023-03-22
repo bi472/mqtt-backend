@@ -11,7 +11,12 @@ export class MqttService{
   private readonly logger = new Logger(MqttService.name);
   private mqttClient;
 
-  async connect(mqttOptionsDto: MqttOptionsDto, callback:(connected: boolean) => void): Promise<void> {
+  async connect(mqttOptionsDto: MqttOptionsDto, callback:(connected: boolean) => void): Promise<any> {
+    if (this.mqttClient?.connected !== undefined){
+      console.log('popal')
+      return false
+    }
+    
     const host = (await mqttOptionsDto).host
     const port = (await mqttOptionsDto).port
     const username = (await mqttOptionsDto).username

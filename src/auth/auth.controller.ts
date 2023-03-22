@@ -46,7 +46,7 @@ export class AuthController {
     @Req() req: Request, 
     @Res({ passthrough: true }) res: ResponseType
   ) {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.get('Authorization') !== undefined ? req.get('Authorization').replace('Bearer', '').trim() : req.cookies.refreshToken;
     const newAuthToken = await this.authService.refreshTokens(req.user['sub'], refreshToken);
     this.authService.storeTokenInCookie(res, newAuthToken);
     return newAuthToken
