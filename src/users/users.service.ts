@@ -5,6 +5,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 
+type PushColumn = {
+  columnName: string,
+  value: string
+}
+
 @Injectable()
 export class UsersService {
   
@@ -23,11 +28,11 @@ export class UsersService {
     return this.userModel.findOne({id}).exec();
   }
 
-  async push(id: string, columnName: string, value: string){
+  async push(id: string, columnName: string,  value: string){
     this.userModel
       .findOneAndUpdate(
         {id},
-        {$push: {columnName: value}},
+        {$push: {[columnName]: value}},
         {new: true}
       )
       .exec()

@@ -25,14 +25,15 @@ export class MqttController {
   ): Promise<any>{
 
     try {
-      
-    
     const promise =  new Promise(
       async (resolve, reject) => {
         console.log(body.mqttOptionsID)
         const mqttOptionsDto = await this.mqttOptionsService.findUserMqttOptionsByID(body.mqttOptionsID, req.user['sub'])
+        console.log(mqttOptionsDto)
         this.mqttService.connect(mqttOptionsDto ? mqttOptionsDto : body.mqttOptionsDto, 
-          (connected: boolean) => { resolve(connected) })
+          (connected: boolean) => { 
+            resolve(connected)
+          })
       }
     )
 
