@@ -50,7 +50,7 @@ export class MqttController {
     @Req() req: Request,
     @Body() body: { topic: string, templateID: string},
   ) {
-      const template = await this.templatesService.findUserTemplatesByID(body.templateID, req.user['sub'])
+      const template = await this.templatesService.findUserTemplateByID(req.user['sub'], body.templateID)
       this.mqttService.subscribe(template.topic, 
         (message: string) => {
             this.logger.log(`Received message on ${template.topic}: ${message}`) 
@@ -63,7 +63,7 @@ export class MqttController {
     @Req() req: Request,
     @Body() body: { topic: string, message: string, templateID: string},
   ): Promise<string> {
-    const template = await this.templatesService.findUserTemplatesByID(body.templateID, req.user['sub'])
+    const template = await this.templatesService.findUserTemplateByID(req.user['sub'], body.templateID)
     this.mqttService.publish(body.topic ? body.topic : template.topic, body.message ? body.message : template.message);
     return `Published ${body.message} to ${body.topic}`;
   }

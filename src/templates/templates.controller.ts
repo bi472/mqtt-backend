@@ -31,7 +31,7 @@ export class TemplatesController {
   @UseGuards(AccessTokenGuard)
   @Get()
   async findAll(@Req() req: Request){
-    return await this.templatesService.findUserTemplates(req.user['sub'])
+    return await this.templatesService.findAllUserTemplates(req.user['sub'])
   }
 
   @UseGuards(AccessTokenGuard)
