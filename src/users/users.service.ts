@@ -25,13 +25,13 @@ export class UsersService {
   }
 
   async findById(id: string): Promise<UserDocument> {
-    return this.userModel.findOne({id}).exec();
+    return this.userModel.findOne({_id: id}).exec();
   }
 
   async push(id: string, columnName: string,  value: string){
     this.userModel
       .findOneAndUpdate(
-        {id},
+        {_id: id},
         {$push: {[columnName]: value}},
         {new: true}
       )
@@ -42,11 +42,11 @@ export class UsersService {
     updateUserDto: UpdateUserDto,
   ): Promise<UserDocument> {
     return await this.userModel
-      .findOneAndUpdate({id}, updateUserDto, { new: true })
+      .findOneAndUpdate({_id: id}, updateUserDto, { new: true })
       .exec();
   }
 
   async remove(id: string): Promise<UserDocument> {
-    return this.userModel.findOneAndDelete({id}).exec();
+    return this.userModel.findOneAndDelete({_id: id}).exec();
   }
 }

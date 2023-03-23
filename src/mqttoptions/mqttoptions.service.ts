@@ -22,7 +22,7 @@ export class MqttOptionsService {
     if(mqttOptionsIDx === -1)
       throw new ForbiddenException('Forbidden')
     else
-      return this.mqttOptionsModel.findOne({id: userID}).exec()
+      return this.mqttOptionsModel.findOne({_id: mqttOptionsID}).exec()
   }
 
   async findUserMqttOptions(userID: string): Promise<MqttOptionsDto[]> {

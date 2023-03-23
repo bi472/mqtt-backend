@@ -14,4 +14,6 @@ export class MqttOptionsDto {
     password: string;
     
     sslConnection: boolean;
+
+    connectionType: string;
 }

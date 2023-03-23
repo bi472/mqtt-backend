@@ -23,6 +23,9 @@ export class MqttOptions {
 
     @Prop({ type: Boolean })
     sslConnection;
+
+    @Prop({ type: String})
+    connectionType;
 }
 
 export const MqttOptionsSchema = SchemaFactory.createForClass(MqttOptions);

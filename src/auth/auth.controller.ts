@@ -31,7 +31,8 @@ export class AuthController {
     @Res({ passthrough: true }) res: ResponseType ){
       const authToken = await this.authService.signIn(data);
       this.authService.storeTokenInCookie(res, authToken)
-      return authToken
+      const {accessToken} = authToken
+      return {accessToken}
   }
 
   @UseGuards(AccessTokenGuard)
@@ -49,6 +50,7 @@ export class AuthController {
     const refreshToken = req.get('Authorization') !== undefined ? req.get('Authorization').replace('Bearer', '').trim() : req.cookies.refreshToken;
     const newAuthToken = await this.authService.refreshTokens(req.user['sub'], refreshToken);
     this.authService.storeTokenInCookie(res, newAuthToken);
-    return newAuthToken
+    const {accessToken} = newAuthToken
+    return {accessToken}
   }
 }
