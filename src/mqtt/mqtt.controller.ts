@@ -1,5 +1,5 @@
 import { MqttService } from './mqtt.service';
-import { BadRequestException, Body, Controller, Delete, Get, HttpException, InternalServerErrorException, Logger, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { MqttOptionsDto } from '../mqttoptions/dto/base-options'
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
@@ -23,13 +23,21 @@ export class MqttController {
     @Req() req: Request,
     @Body() body: { mqttOptionsID: string , mqttOptionsDto: MqttOptionsDto }
   ): Promise<string>{
-    if (this.mqttService.checkConnection()) return `You are already connected.`
+    let responseMessage;
+    if (this.mqttService.checkConnection()) {
+      responseMessage = `You are already connected.`
+      return JSON.stringify({ responseMessage })
+    }
     const promise =  new Promise<string>(
       async (resolve, reject) => {
-        setTimeout(() => {resolve(`The waiting time has expired.`)}, 20000)
+        setTimeout(() => {
+          responseMessage = `The waiting time has expired.`
+          resolve(JSON.stringify({ responseMessage }))
+        }, 20000)
         const mqttOptionsDto = await this.mqttOptionsService.findUserMqttOptionsByID(body.mqttOptionsID, req.user['sub'])
         const {connected, errorMessage} = await this.mqttService.connect(mqttOptionsDto ? mqttOptionsDto : body.mqttOptionsDto)
-        resolve(connected ? 'You are successfully connected!' : `Error: ${errorMessage.message}`)
+        connected ? responseMessage = 'You are successfully connected!' :  responseMessage = `Error: ${errorMessage.message}`
+        resolve(JSON.stringify(responseMessage))
       }
     )
     return promise
@@ -37,10 +45,12 @@ export class MqttController {
 
   @UseGuards(AccessTokenGuard)
   @Get('disconnect')
-  async disconnect(
-    @Req() req: Request
-  ):Promise<string>{
-    if (!this.mqttService.checkConnection()) return `You are not connected.`
+  async disconnect(): Promise<string>{
+    let responseMessage;
+    if (!this.mqttService.checkConnection()){
+      responseMessage = 'You are already connected'
+      return JSON.stringify([responseMessage])
+    }
     await this.mqttService.disconnect()
     return `Connection status: ${this.mqttService.checkConnection()}`
   }
@@ -53,15 +63,22 @@ export class MqttController {
     @Req() req: Request,
     @Body() body: { templateID: string},
   ): Promise<string> {
-    if (!this.mqttService.checkConnection()) return `You are not connected.`
+    let responseMessage;
+    if (!this.mqttService.checkConnection()){
+      responseMessage = 'You are already connected'
+      return JSON.stringify([responseMessage])
+    }
     const template = await this.templatesService.findUserTemplateByID(req.user['sub'], body.templateID)
     const promise = new Promise<string>(
       async (resolve, reject) => {
-        setTimeout(() => {resolve(`You are haven't recieved any message. The waiting time has expired.`)}, 100000)
+        setTimeout(() => {
+          responseMessage = `You are haven't recieved any message. The waiting time has expired.`
+          resolve(JSON.stringify({responseMessage}))
+        }, 100000)
         resolve(this.mqttService.subscribe(template.topic))
     })
 
-    promise.then(() => {this.mqttService.unsubscribe(template.topic)})
+    promise.then(() => this.mqttService.unsubscribe(template.topic))
     return promise
   }
   
@@ -71,10 +88,18 @@ export class MqttController {
     @Req() req: Request,
     @Body() body: { templateID: string},
   ): Promise<string> {
-    if (!this.mqttService.checkConnection()) return `You are not connected.`
-    setTimeout(() => {return(`The waiting time has expired`)}, 10000)
+    let responseMessage;
+    if (!this.mqttService.checkConnection()){
+      responseMessage = 'You are already connected'
+      return JSON.stringify({responseMessage})
+    }
+    setTimeout(() => {
+      responseMessage = `The waiting time has expired`
+      return(JSON.stringify({responseMessage}))
+    }, 10000)
     const template = await this.templatesService.findUserTemplateByID(req.user['sub'], body.templateID)
-    this.mqttService.publish(template.topic,template.message);
-    return `Published ${template.topic} to ${template.message}`;
+    await this.mqttService.publish(template.topic,template.message);
+    responseMessage = `Published ${template.topic} to ${template.message}`
+    return JSON.stringify({responseMessage});
   }
 }

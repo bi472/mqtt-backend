@@ -17,7 +17,7 @@ export class AuthService {
     private readonly configService: ConfigService
   ) {}
 
-  async signUp(createUserDto: CreateUserDto): Promise<any> {
+  async signUp(createUserDto: CreateUserDto): Promise<AuthTokenDto> {
     // Check if user exists
     const userExists = await this.usersService.findByUsername(
       createUserDto.username,
