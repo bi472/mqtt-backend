@@ -22,7 +22,8 @@ export class AuthController {
 
   @Post('signup')
   signup(@Body() createUserDto: CreateUserDto) {
-    return this.authService.signUp(createUserDto);
+    const tokens = this.authService.signUp(createUserDto);
+    return JSON.stringify({tokens.accessToken})
   }
 
   @Post('signin')
