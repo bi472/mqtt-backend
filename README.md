@@ -1,5 +1,4 @@
-# Project Title
-mqtt-backend
+# mqtt-backend
 
 ## Demo link:
 Get hello from [mqtt-backend](http://77.91.78.138:3000/).
