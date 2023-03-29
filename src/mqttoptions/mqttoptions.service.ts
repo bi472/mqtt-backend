@@ -18,6 +18,7 @@ export class MqttOptionsService {
 
   async findUserMqttOptionsByID(mqttOptionsID: string, userID: string) : Promise<MqttOptionsDto> {
     const userData = (await this.usersService.findById(userID))
+    console.log(userData)
     const mqttOptionsIDx = userData.mqttOptions.findIndex(el => el.toString() === mqttOptionsID)
     if(mqttOptionsIDx === -1)
       throw new ForbiddenException('Forbidden')

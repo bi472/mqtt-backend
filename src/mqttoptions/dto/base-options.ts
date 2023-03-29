@@ -1,19 +1,24 @@
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsNotEmpty } from "class-validator";
 
 export class MqttOptionsDto {
+    @ApiProperty()
     @IsNotEmpty({message: 'Please enter hostname'})
     host: string;
 
+    @ApiProperty()
     @IsNotEmpty({message: 'Please enter port'})
     port: number;
 
-    @IsNotEmpty({message: 'Please enter username'})
-    username: string;
+    @ApiPropertyOptional()
+    username?: string;
 
-    @IsNotEmpty({message: 'Please enter password'})
-    password: string;
+    @ApiPropertyOptional()
+    password?: string;
     
-    sslConnection: boolean;
+    @ApiPropertyOptional()
+    sslConnection?: boolean;
 
-    connectionType: string;
+    @ApiPropertyOptional()
+    connectionType?: string;
 }
