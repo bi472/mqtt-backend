@@ -21,7 +21,7 @@ async function bootstrap() {
 
   const options = new DocumentBuilder()
   .setTitle('MQTT backend')
-  .setDescription('It is API for communicate with IOT devices by protocol MQTT!')
+  .setDescription('It is API for communicate with IOT devices by protocol MQTT! Sign up for describe!')
   .setVersion('1.0')
   .addBearerAuth()
   .addCookieAuth()
