@@ -1,0 +1,25 @@
+#docker-compose file
+version: '3'
+
+services:
+  nestapp:
+    container_name: nestapp
+    image: fnder7/mqtt-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+    - mongodb
+
+  mongodb:
+    container_name: database
+    image: fnder7/mongo
+    restart: always
+    volumes:
+      - './data:/data/db'
+    ports:
+      - "27017:27017"
