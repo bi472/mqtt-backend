@@ -1,25 +1,21 @@
 # mqtt-backend
 
 ## Demo link:
-Get hello from [mqtt-backend](http://77.91.78.138:3000/).
+Get hello from [mqtt-backend](http://194.28.226.132:3000/).
 
 ## Documentation
-Coming soon.
+There you can view the [API documentation](http://194.28.226.132:3000/docs).
 
 ## Table of Content:
 
 - [About The App](#about-the-app)
-- [Screenshots](#screenshots)
 - [Technologies](#technologies)
 - [Setup with Docker](#setup)
 - [Envoroment variables](#setup)
+- [Documentation](#documentation)
 - [Status](#status)
-- [Credits](#credits)
-- [License](#license)
-
 ## About The App
 mqtt-backend is app with authentication to communiucate with MQTT Server.
-
 ## Technologies
 I used `Nest JS`, `MongoDB`, `Docker`.
 
@@ -46,12 +42,4 @@ JWT_REFRESH_SECRET = <your secret refresh code>
 ```
 
 ## Status
-[mqtt-backend] is still in progress. Working with documentation.
-
-## Credits
-
-......
-
-## License
-
-.....
+[mqtt-backend] works stably
