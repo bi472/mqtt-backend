@@ -1,10 +1,10 @@
 # mqtt-backend
 
 ## Demo link:
-Get hello from [mqtt-backend](http://46.254.20.115:3000/).
+Get hello from [mqtt-backend](http://67.207.78.195:3000/).
 
 ## Documentation
-There you can view the [API documentation](http://46.254.20.115:3000/docs).
+There you can view the [API documentation](http://67.207.78.195:3000/docs).
 
 ## Table of Content:
 
